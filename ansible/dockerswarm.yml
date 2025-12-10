@@ -1,0 +1,29 @@
+---
+- name: Initialize Docker Swarm and join worker
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+  vars:
+    swarm_manager_ip: "34.28.81.1"
+    swarm_worker_ip: "34.132.79.174"
+    docker_user: "ubuntu"
+
+  tasks:
+    - name: Check if this node is already a manager
+      ansible.builtin.shell: docker info --format '{{"{{.Swarm.LocalNodeState}}"}}'
+      register: swarm_state
+      changed_when: false
+
+    - name: Initialize Swarm on manager
+      ansible.builtin.shell: docker swarm init --advertise-addr {{ swarm_manager_ip }}
+      when: inventory_hostname == "vm1" and swarm_state.stdout != "active"
+      register: swarm_init
+
+    - name: Get join token for worker
+      ansible.builtin.shell: docker swarm join-token -q worker
+      when: inventory_hostname == "vm1"
+      register: worker_token
+
+    - name: Join Swarm as worker
+      ansible.builtin.shell: docker swarm join --token {{ hostvars['vm1'].worker_token.stdout }} {{ swarm_manager_ip }}:2377
+      when: inventory_hostname == "vm2"

@@ -1,0 +1,32 @@
+---
+- name: Deploy Mario Game Docker image to Swarm
+  hosts: vm1
+  become: yes
+  gather_facts: yes
+  vars:
+    service_name: "mario-game"
+    image_name: "rukevweubio/mario-game-ubio:latest"
+    replicas: 6
+    published_port: 8080   # change if needed
+
+  tasks:
+    - name: Check if service already exists
+      ansible.builtin.shell: docker service ls --filter name={{ service_name }} -q
+      register: service_check
+      changed_when: false
+
+    - name: Deploy service if it does not exist
+      ansible.builtin.shell: >
+        docker service create
+        --name {{ service_name }}
+        --replicas {{ replicas }}
+        --publish {{ published_port }}:{{ published_port }}
+        {{ image_name }}
+      when: service_check.stdout == ""
+
+    - name: Update service if it already exists
+      ansible.builtin.shell: >
+        docker service update
+        --image {{ image_name }}
+        {{ service_name }}
+      when: service_check.stdout != ""

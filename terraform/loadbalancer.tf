@@ -1,3 +1,4 @@
+# Instance group
 resource "google_compute_instance_group" "ig" {
   name      = "mage-instance-group"
   zone      = var.zone
@@ -7,42 +8,41 @@ resource "google_compute_instance_group" "ig" {
   ]
 
   named_port {
-    name = "http"
+    name = "tcp-8080"
     port = 8080
   }
 }
 
-resource "google_compute_health_check" "hc" {
-  name = "mage-health-check"
+# TCP health check
+resource "google_compute_health_check" "tcp_hc" {
+  name = "mage-tcp-health-check"
 
   tcp_health_check {
     port = 8080
   }
 }
 
-resource "google_compute_backend_service" "backend" {
-  name                  = "mage-backend"
-  protocol              = "HTTP"
+# Backend service (TCP)
+resource "google_compute_backend_service" "tcp_backend" {
+  name                  = "mage-tcp-backend"
+  protocol              = "TCP"
   load_balancing_scheme = "EXTERNAL"
-  health_checks         = [google_compute_health_check.hc.id]
+  health_checks         = [google_compute_health_check.tcp_hc.id]
 
   backend {
     group = google_compute_instance_group.ig.id
   }
 }
 
-resource "google_compute_url_map" "url_map" {
-  name            = "mage-url-map"
-  default_service = google_compute_backend_service.backend.id
+# TCP target proxy
+resource "google_compute_target_tcp_proxy" "tcp_proxy" {
+  name            = "mage-tcp-proxy"
+  backend_service = google_compute_backend_service.tcp_backend.id
 }
 
-resource "google_compute_target_http_proxy" "proxy" {
-  name    = "mage-http-proxy"
-  url_map = google_compute_url_map.url_map.id
-}
-
-resource "google_compute_global_forwarding_rule" "forwarding_rule" {
-  name       = "mage-forwarding-rule"
-  target     = google_compute_target_http_proxy.proxy.id
-  port_range = "80"
+# Forwarding rule for TCP
+resource "google_compute_global_forwarding_rule" "tcp_forwarding" {
+  name       = "mage-tcp-forwarding-rule"
+  target     = google_compute_target_tcp_proxy.tcp_proxy.id
+  port_range = "8080"
 }

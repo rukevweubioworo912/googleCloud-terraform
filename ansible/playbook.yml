@@ -1,0 +1,64 @@
+---
+- name: Install Docker and setup ubuntu user
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+  vars:
+    docker_version: "24"
+    new_user: "ubuntu"
+
+  tasks:
+    - name: Update the apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 36000
+
+    - name: Install Docker dependencies
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - gnupg
+        state: present
+
+    - name: Add Docker GPG key
+      ansible.builtin.shell: |
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+      args:
+        creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+    - name: Add Docker repository
+      ansible.builtin.shell: |
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+
+    - name: Install Docker
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create ubuntu user if not exists
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        state: present
+        shell: /bin/bash
+        create_home: yes
+
+    - name: Add ubuntu user to docker group
+      ansible.builtin.user:
+        name: "{{ new_user }}"
+        groups: docker
+        append: yes
