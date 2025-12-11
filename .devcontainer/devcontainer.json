@@ -3,6 +3,9 @@
 	"features": {
 		"ghcr.io/devcontainers/features/terraform:1": {},
 		"ghcr.io/devcontainers-extra/features/ansible:2": {},
-		"ghcr.io/dhoeric/features/google-cloud-cli:1": {}
+		"ghcr.io/dhoeric/features/google-cloud-cli:1": {},
+		"ghcr.io/devcontainers-extra/features/act:1": {},
+		"ghcr.io/devcontainers-extra/features/act-asdf:2": {},
+		"ghcr.io/devcontainers-extra/features/checkov:1": {}
 	}
 }

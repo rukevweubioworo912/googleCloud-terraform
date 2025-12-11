@@ -41,13 +41,13 @@ resource "google_compute_firewall" "swarm" {
 
 resource "google_compute_firewall" "allow_8080" {
   name    = "allow-8080"
-  network = google_compute_network.vpc.name  # your VPC resource name
+  network = google_compute_network.vpc.name # your VPC resource name
 
   allow {
     protocol = "tcp"
     ports    = ["8080"]
   }
 
-  source_ranges = ["0.0.0.0/0"]  
-  target_tags   = ["mage"] 
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["mage"]
 }

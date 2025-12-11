@@ -30,12 +30,12 @@ variable "machine_type" {
 variable "ssh_user" {
   description = "SSH username"
   type        = string
-   default= "ubuntu"
+  default     = "ubuntu"
 }
 
 
 variable "ssh_public_key_path" {
   description = "SSH username"
   type        = string
-   default= "id_rsa.pub"
+  default     = "id_rsa.pub"
 }

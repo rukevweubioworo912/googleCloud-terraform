@@ -1,7 +1,7 @@
 # Instance group
 resource "google_compute_instance_group" "ig" {
-  name      = "mage-instance-group"
-  zone      = var.zone
+  name = "mage-instance-group"
+  zone = var.zone
   instances = [
     google_compute_instance.vm1.id,
     google_compute_instance.vm2.id

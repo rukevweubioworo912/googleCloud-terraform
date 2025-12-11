@@ -14,9 +14,9 @@ resource "google_compute_instance" "vm1" {
     access_config {}
   }
 
- metadata = {
-  ssh-keys = "${var.ssh_user}:${file("${path.module}/id_rsa.pub")}"
-}
+  metadata = {
+    ssh-keys = "${var.ssh_user}:${file("${path.module}/id_rsa.pub")}"
+  }
 
   tags = ["mage"]
 }
@@ -37,9 +37,9 @@ resource "google_compute_instance" "vm2" {
     access_config {}
   }
 
-metadata = {
-  ssh-keys = "${var.ssh_user}:${file("${path.module}/id_rsa.pub")}"
-}
+  metadata = {
+    ssh-keys = "${var.ssh_user}:${file("${path.module}/id_rsa.pub")}"
+  }
 
   tags = ["mage"]
 }
